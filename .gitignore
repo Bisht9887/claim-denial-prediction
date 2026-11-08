@@ -1,0 +1,6 @@
+# CMS files are downloaded by the notebook on first run
+data/
+.ipynb_checkpoints/
+__pycache__/
+.venv/
+*.pyc
