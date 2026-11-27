@@ -1,5 +1,6 @@
-# CMS files are downloaded by the notebook on first run
-data/
+# CMS files are downloaded by the notebooks on first run; keep only the data README
+data/*
+!data/README.md
 .ipynb_checkpoints/
 __pycache__/
 .venv/

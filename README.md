@@ -1,63 +1,90 @@
 # Is Claim Denial a Property of the Insurer or the Plan?
 
-ANLY 530 (Principles and Applications of Machine Learning), KA1 conference-paper project. Author: Ankit Bisht.
+ANLY 530 (Principles and Applications of Machine Learning), Harrisburg University of Science and Technology. Final research project (KA2). Author: Ankit Bisht.
 
 ## Research question
 
-How much of the variation in claim denial rates across ACA Marketplace plans is attributable to the insurer rather than to the plan's design, and can publicly reported plan attributes predict a plan's denial rate for insurers not seen during training?
+Insurers selling ACA Marketplace plans must report how many claims they receive and deny, and CMS publishes the counts plan by plan. This project asks:
 
-The primary result is the variance decomposition. The prediction experiments test what it implies: a model should predict well only when it already knows the insurer.
+1. **RQ1 (primary).** How much of the variation in plan denial rates lies between insurers rather than among plans of the same insurer, and does that share hold when excluded plans, insurer concentration, claim volume and other years are taken into account?
+2. **RQ2.** Can publicly reported plan attributes, alone or with the insurer's prior-year denial rate, predict denial rates for established insurers left out of model training?
+3. **RQ3.** How well can denial rates be predicted for insurers in their first year on the Marketplace?
+
+## Main findings
+
+- About 61% of the variance in 2024 plan denial rates lies between insurers (95% cluster-bootstrap interval 45% to 74%); plan type, metal level and exchange type explain 3.7% of that insurer variance. Every robustness check keeps the share above one half.
+- With whole insurers held out (10 x 5-fold cross-validation grouped by insurer), no model predicts 2024 plan denial rates measurably better than the training mean, although random splits suggest about 40% lower error. Plan attributes alone never help; the only gains (claims year 2023, and without the largest insurer) come from gradient boosting with the insurer's prior-year denial rate.
+- Insurers in their first claims year have prediction errors 1.65 times larger than other insurers, because their denial rates vary about twice as widely.
 
 ## Repository contents
 
-| File | Purpose |
+| Path | Purpose |
 |---|---|
-| `claim_denial_exploratory.ipynb` | Milestone 1. Data audit, target description, insurer-versus-plan variance decomposition, and prediction under random versus insurer-grouped cross-validation |
-| `milestone2_analysis.ipynb` | Milestone 2. Selection, insurer-concentration and claim-volume checks on the insurer share of variance; repeated insurer-grouped cross-validation with paired model-baseline comparisons; separate tests for insurers new to the Marketplace. Reproduces every number, table and figure in the Milestone 2 report |
-| `paper_analysis.ipynb` | Reproduces every table and figure in the draft paper: fitness-for-use audit, variance-components models, plan-attribute effects, grouped cross-validation and temporal validation (claims years 2022 to 2024) |
-| `figures/` | Figures written by `paper_analysis.ipynb` (`fig*.png`) and `milestone2_analysis.ipynb` (`m2_fig*.png`) |
-| `requirements.txt` | Python packages and versions |
+| `final_analysis.ipynb` | **Final paper (KA2).** Reproduces every table and figure in the manuscript and writes them to `results/` |
+| `results/tables/` | Tables 1 to 7 of the analysis as CSV files (written by `final_analysis.ipynb`) |
+| `results/figures/` | Figures 1 to 4 of the manuscript (written by `final_analysis.ipynb`) |
+| `milestone2_analysis.ipynb` | Milestone 2 progress report analysis (kept unchanged; writes `figures/m2_fig*.png`) |
+| `claim_denial_exploratory.ipynb` | Milestone 1 exploratory notebook (kept unchanged) |
+| `paper_analysis.ipynb` | Analysis for an earlier draft paper (writes `figures/fig*.png`) |
+| `data/README.md` | Where the CMS files come from and how the notebooks obtain them |
+| `requirements.txt` | Python packages with the versions used |
 
 ## Data
 
-CMS Transparency in Coverage Public Use Files, individual-market medical plans (sheet "Ind QHP"):
+Public CMS Transparency in Coverage files for plan years 2024, 2025 and 2026, which report claims for calendar years 2022, 2023 and 2024. One row is one plan; the target is the in-network denial rate (claims denied / claims received). The files are public and contain no patient information. The notebooks download them from CMS on first run and cache them in `data/`, which is not committed. See [data/README.md](data/README.md) for sources, codes and the differences between files.
 
-- Plan year 2026 file: claims for calendar year 2024 (main analysis)
-- Plan year 2025 file: claims for calendar year 2023 (prior-year insurer denial rate, year-ahead tests)
-- Plan year 2024 file: claims for calendar year 2022 (year-ahead tests and temporal calibration)
+## How to reproduce the results
 
-Source: https://www.cms.gov/marketplace/resources/data/public-use-files
+1. Install Python 3.12 or later (results were produced with Python 3.14.2) and the packages:
 
-One row is one plan. The target is the in-network claim denial rate (claims denied / claims received). The data are public, aggregated and contain no patient information. The notebooks download the files from CMS on first run and cache them in `data/`, which is excluded from the repository.
+   ```
+   pip install -r requirements.txt
+   ```
 
-Two things to know about the files:
+2. Run the final notebook from top to bottom, either in Jupyter or from the command line:
 
-- The plan year 2024 file has no `Exchange_Type` column and names enrollment `Enrollment_Data`. Exchange type is fixed within a state, so `milestone2_analysis.ipynb` fills it from the state.
-- The enrollment field is not on the same scale in every file (for the same plans, the 2024 claims-year values are a median 12% of the 2023 values), so enrollment is used only within a year.
+   ```
+   jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.timeout=5400 final_analysis.ipynb
+   ```
 
-## How to run
+   The first run needs an internet connection to download the CMS files (about 3 MB). The full run takes about 10 minutes on a 16-core computer and uses all CPU cores, because every model is fitted on more than 200 cross-validation folds with tuning inside each fold.
 
-```
-pip install -r requirements.txt
-jupyter notebook claim_denial_exploratory.ipynb
-jupyter notebook milestone2_analysis.ipynb
-jupyter notebook paper_analysis.ipynb
-```
+3. The tables and figures appear in `results/`:
 
-Run all cells from top to bottom. The first run needs an internet connection to download the CMS files (about 3 MB). `milestone2_analysis.ipynb` takes about 10 minutes on a 16-core machine because it fits every model on 150 insurer-grouped folds; it uses all CPU cores and needs scikit-learn 1.6 or later. `paper_analysis.ipynb` takes a few minutes because of the cluster bootstrap. Seed: 42.
+   | Manuscript item | Output file |
+   |---|---|
+   | Table 1 (coverage) | `results/tables/table1_coverage.csv` |
+   | Table 2, Figure 2 (insurer share under each check) | `results/tables/table2_insurer_share.csv`, `results/figures/fig2_insurer_share.png` |
+   | Table 3 (plan-attribute effects) | `results/tables/table3_plan_attribute_effects.csv` |
+   | Table 4 (random vs. grouped validation) | `results/tables/table4_model_comparison_2024.csv` |
+   | Table 5, Figure 3 (robustness of the model comparison) | `results/tables/table5_model_comparison_sensitivity.csv`, `results/figures/fig3_paired_differences.png` |
+   | Table 6, Figure 4 (first-year insurers) | `results/tables/table6_year_ahead_new_insurers.csv`, `results/figures/fig4_new_insurers.png` |
+   | Prior-year history (Section 4.6) | `results/tables/table7_prior_year_history.csv` |
+   | Figure 1 (plan and insurer rates) | `results/figures/fig1_rates.png` |
+
+   The CSV files store proportions (0.01 = one percentage point); the manuscript reports the same values in percentage points.
+
+The Milestone 1 and Milestone 2 notebooks run the same way and are kept as submitted.
 
 ## Evaluation design
 
-- Metric: mean absolute error of the denial rate (0.01 = one percentage point).
-- Baseline: the training-fold mean, scored on the same folds as every model.
-- Folds grouped by insurer (`GroupKFold`), so no insurer appears in both training and test data. Random 5-fold is reported only to show how much it overstates performance.
-- Milestone 2: the grouped 5-fold split is repeated 10 times (50 test folds). Each model is compared with the baseline fold by fold, with a 95% interval from the corrected resampled t-test (Nadeau & Bengio, 2003). The comparison is repeated with plans weighted by claims received and with the largest insurer removed.
-- Every model (ridge, random forest, gradient boosting) is tuned inside each training fold, with inner folds also grouped by insurer.
-- Insurers new to the Marketplace are tested separately: train on one year, predict the next, for insurers that CMS flagged as new the year before.
-- Denial reasons, resubmissions, appeals and same-year insurer totals are excluded because they are recorded alongside or after the denials.
+- **Metric:** mean absolute error of the denial rate.
+- **Baseline:** the training-fold mean, scored on the same folds as every model.
+- **Main validation:** five-fold cross-validation grouped by insurer (`GroupKFold`), repeated 10 times with different insurer assignments (50 test folds). No insurer appears in both training and test data. Random five-fold results are reported only to show how much they overstate performance.
+- **Model comparison:** fold-by-fold difference from the baseline with a 95% corrected resampled t interval (Nadeau & Bengio, 2003). Repeated with claim-volume weights, without the largest insurer and on claims year 2023.
+- **Models:** ridge regression, random forest and gradient boosting, each tuned inside every training fold on inner folds grouped by insurer.
+- **Leakage controls:** all preprocessing (one-hot encoding, imputation, scaling) is fitted inside the training folds; denial reasons, resubmissions, appeals and same-year insurer totals are excluded.
+- **New insurers:** the CMS new-insurer flag identifies insurers in their first claims year; models trained on one year predict the next.
+
+## Reproducibility notes and limitations
+
+- Seeds: 42 for models and bootstraps; repeat r of the grouped split uses seed r. Folds run in parallel, but each is seeded, so results do not depend on the order in which folds finish.
+- `statsmodels` prints a "MLE may be on the boundary" notice for every mixed-model fit, including fits whose variance components are clearly positive; the notebook silences it and prints the variance components so they can be checked.
+- `GroupKFold(shuffle=True)` requires scikit-learn 1.6 or later. Other package versions may change results in the last decimal place.
+- The data are self-reported plan-level aggregates for states on the federal platform. Results describe patterns, not individual claim decisions or causal effects.
 
 ## Status
 
-Milestone 1 (Week 10): research protocol and exploratory notebook.
-Milestone 2 (Week 12): progress report and `milestone2_analysis.ipynb` (selection, concentration and claim-volume checks, paired model comparisons, new-insurer tests).
-Final paper and presentation: Week 13.
+- Milestone 1 (Week 10): research protocol and exploratory notebook.
+- Milestone 2 (Week 12): progress report and `milestone2_analysis.ipynb`.
+- Final paper and recorded presentation (Week 13): `final_analysis.ipynb` and `results/`.

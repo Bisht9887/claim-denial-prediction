@@ -1,0 +1,11 @@
+test set,model,MAE,difference from baseline,95% low,95% high
+First-year insurers (new to the Marketplace),Baseline: mean of the previous year's plan rates,0.09338905959326957,,,
+First-year insurers (new to the Marketplace),Ridge: plan attributes,0.09327815208932029,-0.00011090750394925737,-0.0014373214032897357,0.001528463128297965
+First-year insurers (new to the Marketplace),Ridge: plan attributes + state,0.0929503978930112,-0.00043866170025836206,-0.0021714274226497313,0.001645282553560856
+First-year insurers (new to the Marketplace),Random forest: plan attributes + state,0.09562497871606036,0.002235919122790784,-0.0018636904238745384,0.006894119914376521
+First-year insurers (new to the Marketplace),Gradient boosting: plan attributes + state,0.0962102502089989,0.0028211906157293467,-0.004394422394285131,0.012072292464317517
+"All other insurers, one year ahead",Baseline: mean of the previous year's plan rates,0.05673455002476902,,,
+"All other insurers, one year ahead",Ridge: plan attributes,0.0564307462399738,-0.00030380378479521997,-0.0007840438821821848,0.0001415119984626472
+"All other insurers, one year ahead",Ridge: plan attributes + state,0.05516953794176172,-0.001565012083007308,-0.0039025647494879377,0.0003983812675976176
+"All other insurers, one year ahead",Random forest: plan attributes + state,0.05439612069076157,-0.002338429334007446,-0.0056710957678441426,0.00028153905895452017
+"All other insurers, one year ahead",Gradient boosting: plan attributes + state,0.0528218905613314,-0.003912659463437622,-0.00821546614343053,-0.000725339436608768
