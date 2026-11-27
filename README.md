@@ -26,8 +26,10 @@ Insurers selling ACA Marketplace plans must report how many claims they receive 
 | `milestone2_analysis.ipynb` | Milestone 2 progress report analysis (kept unchanged; writes `figures/m2_fig*.png`) |
 | `claim_denial_exploratory.ipynb` | Milestone 1 exploratory notebook (kept unchanged) |
 | `paper_analysis.ipynb` | Analysis for an earlier draft paper (writes `figures/fig*.png`) |
+| `manuscript/` | The final research paper (PDF and Word) |
 | `data/README.md` | Where the CMS files come from and how the notebooks obtain them |
 | `requirements.txt` | Python packages with the versions used |
+| `LICENSE` | MIT license for the code (the CMS data are public and are not stored here) |
 
 ## Data
 
